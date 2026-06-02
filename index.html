@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>fallfind · search the sovereign estate · find the tool that ends your pain</title>
+<meta name="description" content="Simon Gant's live searchable portfolio · 60+ sovereign single-file builds · paste your stack · get the tool that replaces it.">
+<meta name="theme-color" content="#0b0a0f">
+<link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"fallfind","short_name":"fallfind","start_url":"./","display":"standalone","background_color":"%230b0a0f","theme_color":"%230b0a0f","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 fill=%22%230b0a0f%22/><text x=%2232%22 y=%2240%22 font-size=%2236%22 text-anchor=%22middle%22 fill=%22%23d4a853%22 font-family=%22serif%22>%E2%97%8A</text></svg>","sizes":"any","type":"image/svg+xml"}]}'>
+<link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="%230b0a0f"/><text x="32" y="46" font-size="44" text-anchor="middle" fill="%23d4a853" font-family="serif">&#9674;</text></svg>'>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital@0;1&family=Syne:wght@500;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ox:#8b1a1a; --brass:#b8974a; --gold:#d4a853; --cream:#c4bfb2;
+    --void:#0b0a0f; --surface:#14131a; --raised:#1a1822; --border:#2a2730;
+    --muted:#6f6b78; --dim:#4a4754; --green:#4a8a4a; --amber:#c87e3a; --red:#c8371a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--void);color:var(--cream);font-family:'DM Sans',system-ui,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+  body{background-image:radial-gradient(at 12% 0%,rgba(139,26,26,.08) 0%,transparent 42%),radial-gradient(at 88% 100%,rgba(184,151,74,.06) 0%,transparent 38%)}
+  a{color:var(--brass);text-decoration:none}
+  a:hover{color:var(--gold)}
+  header{padding:32px 40px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px}
+  header .brand h1{font-family:'Libre Baskerville',serif;font-size:30px;margin:0 0 6px;letter-spacing:.01em;color:var(--cream)}
+  header .brand h1 em{color:var(--gold);font-style:italic}
+  header .brand .tag{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+  header .meta{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;text-align:right}
+  header .meta .live{color:var(--green)}
+  header .meta .dead{color:var(--red)}
+  main{max-width:1280px;margin:0 auto;padding:28px 40px 64px}
+  @media (max-width:720px){header{padding:24px 18px 14px}main{padding:20px 18px 48px}}
+  .controls{margin-bottom:20px}
+  .search-wrap{position:relative;margin-bottom:14px}
+  .search-wrap input{
+    width:100%;background:var(--surface);border:1px solid var(--border);color:var(--cream);
+    padding:18px 22px;font-family:'Libre Baskerville',serif;font-size:18px;font-style:italic;
+  }
+  .search-wrap input:focus{outline:1px solid var(--gold);outline-offset:-1px;border-color:var(--gold)}
+  .search-wrap .clear{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:var(--muted);font-family:'DM Mono';font-size:12px;cursor:pointer;letter-spacing:.1em}
+  .search-wrap .clear:hover{color:var(--gold)}
+  .chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center}
+  .chip-row .lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-right:6px}
+  .chip{
+    background:transparent;border:1px solid var(--border);color:var(--cream);
+    padding:5px 11px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;
+    letter-spacing:.04em;transition:all .12s;
+  }
+  .chip:hover{border-color:var(--brass);color:var(--gold)}
+  .chip.active{background:var(--ox);border-color:var(--ox);color:var(--cream)}
+  .chip .n{color:var(--muted);margin-left:6px;font-size:10px}
+  .chip.active .n{color:var(--cream)}
+  .toggle-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:8px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.06em}
+  .toggle-row label{display:flex;align-items:center;gap:6px;cursor:pointer}
+  .toggle-row input{accent-color:var(--gold)}
+  .counter{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:14px 0 18px;border-bottom:1px solid var(--border);margin-bottom:18px}
+  .counter strong{color:var(--gold);font-weight:500}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+  .card{
+    background:var(--surface);border:1px solid var(--border);padding:18px 20px;
+    display:flex;flex-direction:column;transition:border-color .15s,transform .15s;
+    position:relative;
+  }
+  .card:hover{border-color:var(--brass);transform:translateY(-1px)}
+  .card .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:4px}
+  .card h3{font-family:'Libre Baskerville',serif;font-size:18px;margin:0;color:var(--cream);letter-spacing:.01em}
+  .card h3 .sigil{color:var(--gold);margin-right:4px}
+  .card .status{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--border);white-space:nowrap}
+  .status.live{color:var(--green);border-color:var(--green)}
+  .status.down,.status.offline{color:var(--amber);border-color:var(--amber)}
+  .status.published{color:var(--brass);border-color:var(--brass)}
+  .card .ribbon{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  .card .ribbon .cat{color:var(--brass)}
+  .card .ribbon .tier{color:var(--gold);margin-left:6px}
+  .card .ribbon .prime{color:var(--muted);margin-left:6px}
+  .card .purpose{font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:var(--cream);margin:0 0 12px;flex:1}
+  .card .domain{font-family:'DM Mono',monospace;font-size:10.5px;color:var(--dim);letter-spacing:.05em;margin-bottom:10px}
+  .card .obsoletes{font-family:'DM Sans',sans-serif;font-size:12px;color:var(--cream);margin-bottom:6px;line-height:1.5}
+  .card .obsoletes .lbl{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:6px}
+  .card .obsoletes .ob{color:var(--ox);font-weight:500}
+  .card .grift{font-family:'DM Sans',sans-serif;font-size:12px;color:var(--amber);margin-bottom:14px;line-height:1.5;font-style:italic}
+  .card .grift .lbl{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-style:normal;margin-right:6px}
+  .card .actions{display:flex;gap:8px;margin-top:auto;padding-top:10px;border-top:1px solid var(--border)}
+  .card .btn{
+    flex:1;text-align:center;padding:10px 12px;font-family:'Syne',sans-serif;font-weight:700;
+    font-size:11px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--border);
+    background:transparent;color:var(--cream);cursor:pointer;transition:all .12s;text-decoration:none;display:inline-block;
+  }
+  .card .btn.primary{background:var(--ox);border-color:var(--ox)}
+  .card .btn.primary:hover{background:var(--gold);border-color:var(--gold);color:var(--void)}
+  .card .btn.ghost:hover{border-color:var(--brass);color:var(--gold)}
+  .card .btn.disabled{opacity:.5;cursor:not-allowed;background:transparent}
+  .card.match{border-color:var(--gold)}
+  .card .why-match{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);background:rgba(212,168,83,.06);padding:8px 10px;margin-bottom:12px;border-left:2px solid var(--gold);line-height:1.5}
+  .card .why-match .score{color:var(--brass);margin-right:8px;font-weight:500}
+  .empty{padding:60px 20px;text-align:center;color:var(--muted);font-family:'Libre Baskerville',serif;font-style:italic;font-size:15px}
+  .empty .hint{display:block;margin-top:14px;font-family:'DM Mono',monospace;font-size:11px;font-style:normal;letter-spacing:.1em;color:var(--dim)}
+  .pain{
+    margin-top:48px;padding:28px;border:1px solid var(--border);background:var(--surface);
+    background-image:linear-gradient(135deg,rgba(212,168,83,.04) 0%,transparent 60%);
+  }
+  .pain h2{font-family:'Libre Baskerville',serif;font-size:22px;margin:0 0 6px;color:var(--cream)}
+  .pain h2 .sigil{color:var(--gold)}
+  .pain .sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
+  .pain textarea{
+    width:100%;background:var(--void);border:1px solid var(--border);color:var(--cream);
+    padding:14px 16px;font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;min-height:96px;resize:vertical;
+  }
+  .pain textarea:focus{outline:1px solid var(--gold);outline-offset:-1px;border-color:var(--gold)}
+  .pain .pain-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;align-items:center}
+  .pain .pain-actions .ex{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.08em;margin-right:6px}
+  .pain .match-btn{
+    background:var(--ox);color:var(--cream);border:none;padding:13px 26px;
+    font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    font-size:12px;cursor:pointer;transition:background .15s;
+  }
+  .pain .match-btn:hover{background:var(--gold);color:var(--void)}
+  .pain .preset{
+    background:transparent;border:1px solid var(--border);color:var(--muted);
+    padding:7px 11px;font-family:'DM Mono',monospace;font-size:10.5px;cursor:pointer;letter-spacing:.04em;
+  }
+  .pain .preset:hover{border-color:var(--gold);color:var(--gold)}
+  .pain-results{margin-top:20px}
+  .pain-results .grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+  footer{margin-top:64px;padding:32px 40px;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.08em;text-align:center;line-height:1.9}
+  footer .sigil{color:var(--gold)}
+  footer a{color:var(--brass)}
+  footer a:hover{color:var(--gold)}
+  footer .mark{font-family:'Libre Baskerville',serif;font-style:italic;color:var(--cream);margin:12px 0;font-size:13px;letter-spacing:0}
+  .err{padding:16px 20px;border:1px solid var(--red);background:rgba(200,55,26,.06);color:#ff9b8a;font-family:'DM Mono',monospace;font-size:12px;margin-bottom:18px;line-height:1.6}
+  .loading{padding:80px 20px;text-align:center;color:var(--muted);font-family:'Libre Baskerville',serif;font-style:italic;font-size:16px}
+  .loading::after{content:' ◊';animation:pulse 1.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>&#9674; <em>fallfind</em> &middot; find the sovereign tool that ends your pain</h1>
+    <div class="tag" id="hdrTag">loading the estate&hellip;</div>
+  </div>
+  <div class="meta">
+    <div>prime 433 &middot; v1.0 &middot; sovereign</div>
+    <div id="srcMeta">source: fall-registry</div>
+  </div>
+</header>
+
+<main>
+  <div id="errBox"></div>
+
+  <section class="controls">
+    <div class="search-wrap">
+      <input id="q" type="search" placeholder="search the estate &mdash; name, purpose, the SaaS you're trying to leave&hellip;" autocomplete="off" autofocus>
+      <button class="clear" id="clearBtn" title="clear">CLEAR</button>
+    </div>
+
+    <div class="chip-row" id="kindRow">
+      <span class="lbl">kind</span>
+    </div>
+    <div class="chip-row" id="catRow">
+      <span class="lbl">category</span>
+    </div>
+
+    <div class="toggle-row">
+      <label><input type="checkbox" id="liveOnly" checked> live only</label>
+      <label><input type="checkbox" id="incResearch"> include research</label>
+      <label><input type="checkbox" id="incNoUrl"> include source-only</label>
+      <span style="margin-left:auto">sort:
+        <select id="sortBy" style="background:var(--surface);color:var(--cream);border:1px solid var(--border);padding:4px 6px;font-family:'DM Mono';font-size:11px">
+          <option value="recent">recent</option>
+          <option value="name">name</option>
+          <option value="prime">prime</option>
+          <option value="tier">tier</option>
+        </select>
+      </span>
+    </div>
+  </section>
+
+  <div class="counter" id="counter">loading&hellip;</div>
+
+  <div id="results" class="grid"></div>
+
+  <section class="pain">
+    <h2><span class="sigil">&#9674;</span> Pain &rarr; Tool</h2>
+    <div class="sub">paste your current stack &middot; get the 3 best-fit sovereign replacements &middot; no LLM call &middot; pure client match</div>
+    <textarea id="painInput" placeholder="e.g. I'm using HubSpot for CRM, Calendly for booking, Notion for notes, Xero for invoicing&hellip; tell me what I can replace."></textarea>
+    <div class="pain-actions">
+      <span class="ex">try:</span>
+      <button class="preset" data-preset="I'm losing time on HubSpot + Calendly + Notion">HubSpot + Calendly + Notion</button>
+      <button class="preset" data-preset="I pay for Xero and QuickBooks every month and I'm a sole trader plumber">Xero + QuickBooks (trades)</button>
+      <button class="preset" data-preset="LinkedIn content + lead generation + cold outreach">LinkedIn outreach</button>
+      <button class="preset" data-preset="research and prior art and academic papers">research workflow</button>
+      <button class="match-btn" id="matchBtn">Match &rarr;</button>
+    </div>
+    <div class="pain-results" id="painResults"></div>
+  </section>
+</main>
+
+<footer>
+  <div>
+    <span class="sigil">&#9674;</span> MIT &middot; sovereign single-file &middot; <a href="https://github.com/sjgant80-hub/fallfind" target="_blank" rel="noopener">source</a> &middot;
+    pulls from <a href="https://github.com/sjgant80-hub/fall-registry" target="_blank" rel="noopener">fall-registry</a>
+  </div>
+  <div class="mark">The portfolio is the proof. The code is the receipt.</div>
+  <div>
+    Built by <a href="https://www.ai-nativesolutions.com" target="_blank" rel="noopener">Simon Gant &middot; ai-nativesolutions.com</a> &middot;
+    <a href="https://www.linkedin.com/in/simon-gant-295b56180/" target="_blank" rel="noopener">LinkedIn</a> &middot;
+    <a href="https://www.ai-nativesolutions.com" target="_blank" rel="noopener">open the full marketplace &rarr;</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  // ---- constants ---------------------------------------------------------
+  var REG_URL = 'https://raw.githubusercontent.com/sjgant80-hub/fall-registry/main/index.json';
+  var CACHE_KEY = 'fallfind:registry:v1';
+  var CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  var PRIME = 433;
+
+  // ---- state -------------------------------------------------------------
+  var state = {
+    registry: null,
+    items: [],
+    filtered: [],
+    q: '',
+    kind: 'all',
+    cat: 'all',
+    liveOnly: true,
+    incResearch: false,
+    incNoUrl: false,
+    sortBy: 'recent'
+  };
+
+  // ---- mojibake fix: registry was UTF-8 mis-encoded as latin-1 earlier ----
+  // Strings like "Â·" should be "·" (middle dot). Defensive client-side fix.
+  function fixMojibake(s){
+    if (typeof s !== 'string' || !s) return s;
+    if (s.indexOf('Â') === -1 && s.indexOf('Ã') === -1) return s;
+    try {
+      // Re-interpret as latin-1 bytes -> UTF-8
+      return decodeURIComponent(escape(s));
+    } catch(e){ return s; }
+  }
+  function deepFix(o){
+    if (Array.isArray(o)) return o.map(deepFix);
+    if (o && typeof o === 'object'){
+      var out = {};
+      for (var k in o) if (Object.prototype.hasOwnProperty.call(o,k)) out[k] = deepFix(o[k]);
+      return out;
+    }
+    return fixMojibake(o);
+  }
+
+  // ---- konomi licence shim (sovereign tier · no gate) --------------------
+  var Konomi = (function(){
+    var KEY='konomi:fallfind';
+    function read(){ try { return JSON.parse(localStorage.getItem(KEY)||'{}'); } catch(e){ return {}; } }
+    function write(o){ try { localStorage.setItem(KEY, JSON.stringify(o)); } catch(e){} }
+    function tier(){ return 'sovereign'; }
+    function activate(_code){ var s=read(); s.activated=true; s.at=Date.now(); write(s); return true; }
+    function status(){ return { tier:'sovereign', activated:true, sealed:true }; }
+    return { tier:tier, activate:activate, status:status };
+  })();
+  window.Konomi = Konomi;
+
+  // ---- fall-signal hook (prime 433) --------------------------------------
+  var Signal = (function(){
+    var ch = null;
+    try { ch = new BroadcastChannel('fall-signal'); } catch(e){}
+    function emit(type, payload){
+      var msg = { src:'fallfind', prime:PRIME, type:type, payload:payload||{}, t:Date.now() };
+      if (ch) { try { ch.postMessage(msg); } catch(e){} }
+      try { window.dispatchEvent(new CustomEvent('fall-signal', { detail:msg })); } catch(e){}
+    }
+    return { emit:emit };
+  })();
+  window.fallfind = { prime: PRIME, signal: Signal };
+
+  // ---- IndexedDB cache (with localStorage fallback) ----------------------
+  var Cache = (function(){
+    var DB = 'fallfind', STORE = 'cache', VER = 1, db = null;
+    function open(){
+      return new Promise(function(res){
+        if (!window.indexedDB) return res(null);
+        try {
+          var req = indexedDB.open(DB, VER);
+          req.onupgradeneeded = function(){ req.result.createObjectStore(STORE); };
+          req.onsuccess = function(){ db = req.result; res(db); };
+          req.onerror = function(){ res(null); };
+        } catch(e){ res(null); }
+      });
+    }
+    function get(key){
+      return open().then(function(d){
+        if (!d) {
+          try { var v = localStorage.getItem(CACHE_KEY+':'+key); return v?JSON.parse(v):null; } catch(e){ return null; }
+        }
+        return new Promise(function(res){
+          try {
+            var tx = d.transaction(STORE,'readonly'); var st = tx.objectStore(STORE); var r = st.get(key);
+            r.onsuccess = function(){ res(r.result||null); };
+            r.onerror = function(){ res(null); };
+          } catch(e){ res(null); }
+        });
+      });
+    }
+    function set(key, val){
+      return open().then(function(d){
+        if (!d) { try { localStorage.setItem(CACHE_KEY+':'+key, JSON.stringify(val)); } catch(e){} return; }
+        try { var tx = d.transaction(STORE,'readwrite'); tx.objectStore(STORE).put(val, key); } catch(e){}
+      });
+    }
+    return { get:get, set:set };
+  })();
+
+  // ---- fetch registry (cached 5min) --------------------------------------
+  function loadRegistry(){
+    return Cache.get('registry').then(function(cached){
+      if (cached && cached.t && (Date.now() - cached.t) < CACHE_TTL && cached.data){
+        // fire async refresh in background
+        fetchFresh().catch(function(){});
+        return cached.data;
+      }
+      return fetchFresh();
+    });
+  }
+  function fetchFresh(){
+    return fetch(REG_URL, { cache:'no-store' }).then(function(r){
+      if (!r.ok) throw new Error('registry HTTP '+r.status);
+      return r.json();
+    }).then(function(data){
+      var fixed = deepFix(data);
+      Cache.set('registry', { t:Date.now(), data:fixed });
+      return fixed;
+    });
+  }
+
+  // ---- flatten registry to a single item list ----------------------------
+  function flatten(reg){
+    var groups = ['apps','apis','sdks','infra','plugins','research'];
+    var out = [];
+    groups.forEach(function(g){
+      if (!Array.isArray(reg[g])) return;
+      reg[g].forEach(function(it){
+        var copy = {};
+        for (var k in it) if (Object.prototype.hasOwnProperty.call(it,k)) copy[k]=it[k];
+        // normalise
+        if (!copy.kind) copy.kind = g === 'research' ? 'research' : (g === 'infra' ? 'infra' : g.replace(/s$/,''));
+        copy._group = g;
+        copy._name = (copy.name||'').toLowerCase();
+        copy._haystack = [
+          copy.name, copy.purpose, copy.category, copy.domain, copy.kind,
+          (copy.obsoletes||[]).join(' '), copy.grift_exposed||''
+        ].join(' ').toLowerCase();
+        out.push(copy);
+      });
+    });
+    return out;
+  }
+
+  // ---- filter/sort -------------------------------------------------------
+  function filterAndSort(){
+    var q = state.q.trim().toLowerCase();
+    var tokens = q ? q.match(/[a-z0-9]+/g) || [] : [];
+    state.filtered = state.items.filter(function(it){
+      if (state.kind !== 'all' && it._group !== state.kind) return false;
+      if (state.cat !== 'all' && (it.category||'').toLowerCase() !== state.cat) return false;
+      if (!state.incNoUrl && !it.url) return false;
+      if (!state.incResearch && it._group === 'research') return false;
+      if (state.liveOnly){
+        var s = (it.status||'').toLowerCase();
+        if (s && s !== 'live' && s !== 'published') return false;
+      }
+      if (tokens.length){
+        for (var i=0;i<tokens.length;i++){
+          if (it._haystack.indexOf(tokens[i]) === -1) return false;
+        }
+      }
+      return true;
+    });
+    var sb = state.sortBy;
+    state.filtered.sort(function(a,b){
+      if (sb === 'name') return a._name < b._name ? -1 : a._name > b._name ? 1 : 0;
+      if (sb === 'prime') return (a.prime||9999) - (b.prime||9999);
+      if (sb === 'tier'){
+        var ta = (a.tier||'Z'), tb = (b.tier||'Z');
+        return ta < tb ? -1 : ta > tb ? 1 : 0;
+      }
+      // recent
+      var da = a.shipped || '0', db = b.shipped || '0';
+      return db < da ? -1 : db > da ? 1 : 0;
+    });
+  }
+
+  // ---- escape ------------------------------------------------------------
+  function esc(s){
+    return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+    });
+  }
+
+  // ---- render card -------------------------------------------------------
+  function renderCard(it, matchInfo){
+    var status = (it.status||'').toLowerCase();
+    var statusLbl = status || (it.url ? 'unknown' : '');
+    var live = status === 'live' || status === 'published';
+    var primary = it.url
+      ? '<a class="btn primary" href="'+esc(it.url)+'" target="_blank" rel="noopener">Open live &rarr;</a>'
+      : '<span class="btn disabled">no live url</span>';
+    var src = it.source
+      ? '<a class="btn ghost" href="'+esc(it.source)+'" target="_blank" rel="noopener">Source</a>'
+      : '';
+    var ob = (it.obsoletes && it.obsoletes.length)
+      ? '<div class="obsoletes"><span class="lbl">obsoletes</span><span class="ob">'+esc(it.obsoletes.join(' &middot; '))+'</span></div>'
+      : '';
+    var grift = it.grift_exposed
+      ? '<div class="grift"><span class="lbl">grift</span>'+esc(it.grift_exposed)+'</div>'
+      : '';
+    var why = matchInfo
+      ? '<div class="why-match"><span class="score">score '+matchInfo.score+'</span>matched: '+esc(matchInfo.matches.join(', '))+'</div>'
+      : '';
+    var cat = it.category ? '<span class="cat">'+esc(it.category)+'</span>' : '<span class="cat">'+esc(it._group)+'</span>';
+    var tier = it.tier ? '<span class="tier">&middot; tier '+esc(it.tier)+'</span>' : '';
+    var prime = it.prime ? '<span class="prime">&middot; '+esc(String(it.prime))+'</span>' : '';
+    var statusEl = statusLbl ? '<span class="status '+esc(status||'unknown')+'">'+esc(statusLbl)+'</span>' : '';
+    var domain = it.domain ? '<div class="domain">'+esc(it.domain)+'</div>' : '';
+    var clsMatch = matchInfo ? ' match' : '';
+    return ''+
+      '<article class="card'+clsMatch+'">'+
+        '<div class="top">'+
+          '<h3><span class="sigil">&#9674;</span>'+esc(it.name||'(unnamed)')+'</h3>'+
+          statusEl+
+        '</div>'+
+        '<div class="ribbon">'+cat+tier+prime+'</div>'+
+        why+
+        '<p class="purpose">'+esc(it.purpose||'')+'</p>'+
+        domain+
+        ob+
+        grift+
+        '<div class="actions">'+primary+src+'</div>'+
+      '</article>';
+  }
+
+  // ---- render results ----------------------------------------------------
+  function render(){
+    filterAndSort();
+    var el = document.getElementById('results');
+    var total = state.items.length;
+    var shown = state.filtered.length;
+    document.getElementById('counter').innerHTML = 'showing <strong>'+shown+'</strong> of <strong>'+total+'</strong> sovereign builds'+(state.q?' &middot; "'+esc(state.q)+'"':'');
+    if (!shown){
+      el.innerHTML = '<div class="empty" style="grid-column:1/-1">no builds matched.<span class="hint">try fewer words &middot; try toggling "live only" &middot; try the Pain&rarr;Tool box below</span></div>';
+      return;
+    }
+    el.innerHTML = state.filtered.map(function(it){ return renderCard(it); }).join('');
+    Signal.emit('fallfind_search', { q: state.q, kind: state.kind, cat: state.cat, results: shown });
+  }
+
+  // ---- chip rows ---------------------------------------------------------
+  function buildChips(){
+    var kindCounts = {};
+    var catCounts = {};
+    state.items.forEach(function(it){
+      kindCounts[it._group] = (kindCounts[it._group]||0)+1;
+      var c = (it.category||'').toLowerCase();
+      if (c) catCounts[c] = (catCounts[c]||0)+1;
+    });
+    var kindRow = document.getElementById('kindRow');
+    var kinds = ['apps','apis','sdks','infra','plugins','research'];
+    var kindHTML = '<span class="lbl">kind</span><button class="chip active" data-kind="all">all<span class="n">'+state.items.length+'</span></button>';
+    kinds.forEach(function(k){
+      if (kindCounts[k]) kindHTML += '<button class="chip" data-kind="'+k+'">'+k+'<span class="n">'+kindCounts[k]+'</span></button>';
+    });
+    kindRow.innerHTML = kindHTML;
+
+    var catRow = document.getElementById('catRow');
+    var catList = Object.keys(catCounts).sort(function(a,b){ return catCounts[b]-catCounts[a]; });
+    var catHTML = '<span class="lbl">category</span><button class="chip active" data-cat="all">all</button>';
+    catList.forEach(function(c){
+      catHTML += '<button class="chip" data-cat="'+esc(c)+'">'+esc(c)+'<span class="n">'+catCounts[c]+'</span></button>';
+    });
+    catRow.innerHTML = catHTML;
+
+    kindRow.addEventListener('click', function(e){
+      var b = e.target.closest('button[data-kind]'); if (!b) return;
+      state.kind = b.dataset.kind;
+      kindRow.querySelectorAll('button').forEach(function(x){ x.classList.toggle('active', x===b); });
+      render();
+    });
+    catRow.addEventListener('click', function(e){
+      var b = e.target.closest('button[data-cat]'); if (!b) return;
+      state.cat = b.dataset.cat;
+      catRow.querySelectorAll('button').forEach(function(x){ x.classList.toggle('active', x===b); });
+      render();
+    });
+  }
+
+  // ---- pain matcher (pure client-side) -----------------------------------
+  function matchPain(text){
+    var tokens = (text||'').toLowerCase().match(/[a-z][a-z0-9]+/g) || [];
+    var stop = { the:1,and:1,for:1,with:1,from:1,that:1,this:1,have:1,using:1,use:1,my:1,me:1,i:1,im:1,a:1,an:1,to:1,of:1,on:1,in:1,is:1,it:1,every:1,month:1,monthly:1,time:1,losing:1,pay:1,paying:1,paid:1 };
+    tokens = tokens.filter(function(t){ return t.length >= 3 && !stop[t]; });
+    var uniq = {}; tokens.forEach(function(t){ uniq[t]=1; }); tokens = Object.keys(uniq);
+    if (!tokens.length) return [];
+    var scored = state.items.filter(function(it){
+      if (!it.url) return false;
+      var s = (it.status||'').toLowerCase();
+      return !s || s === 'live' || s === 'published';
+    }).map(function(it){
+      var score = 0, hit = {};
+      var hay = it._haystack;
+      var ob = (it.obsoletes||[]).map(function(o){ return String(o).toLowerCase(); });
+      tokens.forEach(function(t){
+        if (hay.indexOf(t) !== -1){ score += 1; hit[t] = 1; }
+        if (ob.some(function(o){ return o.indexOf(t) !== -1; })){ score += 3; hit[t] = 1; }
+        if ((it._name||'').indexOf(t) !== -1) score += 1;
+        if ((it.category||'').toLowerCase() === t) score += 2;
+      });
+      return { item: it, score: score, matches: Object.keys(hit) };
+    }).filter(function(s){ return s.score > 0; });
+    scored.sort(function(a,b){ return b.score - a.score; });
+    return scored.slice(0, 3);
+  }
+
+  function renderPain(text){
+    var results = matchPain(text);
+    var el = document.getElementById('painResults');
+    if (!results.length){
+      el.innerHTML = '<div class="empty">no matches &mdash; try mentioning the actual SaaS names you use (Stripe, HubSpot, Xero, etc.).</div>';
+      Signal.emit('fallfind_pain', { q:text, results: 0 });
+      return;
+    }
+    var html = '<div class="grid">' + results.map(function(r){ return renderCard(r.item, r); }).join('') + '</div>';
+    el.innerHTML = html;
+    Signal.emit('fallfind_pain', { q:text, results: results.length, matched: results.map(function(r){ return r.item.name; }) });
+  }
+
+  // ---- wire UI -----------------------------------------------------------
+  function debounce(fn, ms){ var t; return function(){ var a=arguments; clearTimeout(t); t = setTimeout(function(){ fn.apply(null, a); }, ms); }; }
+  function wire(){
+    var q = document.getElementById('q');
+    q.addEventListener('input', debounce(function(){ state.q = q.value; render(); }, 80));
+    document.getElementById('clearBtn').addEventListener('click', function(){ q.value=''; state.q=''; q.focus(); render(); });
+    document.getElementById('liveOnly').addEventListener('change', function(e){ state.liveOnly = e.target.checked; render(); });
+    document.getElementById('incResearch').addEventListener('change', function(e){ state.incResearch = e.target.checked; render(); });
+    document.getElementById('incNoUrl').addEventListener('change', function(e){ state.incNoUrl = e.target.checked; render(); });
+    document.getElementById('sortBy').addEventListener('change', function(e){ state.sortBy = e.target.value; render(); });
+
+    var painInput = document.getElementById('painInput');
+    document.getElementById('matchBtn').addEventListener('click', function(){ renderPain(painInput.value); });
+    painInput.addEventListener('keydown', function(e){
+      if ((e.ctrlKey||e.metaKey) && e.key === 'Enter'){ renderPain(painInput.value); }
+    });
+    document.querySelectorAll('.preset').forEach(function(b){
+      b.addEventListener('click', function(){
+        painInput.value = b.dataset.preset;
+        renderPain(painInput.value);
+        painInput.scrollIntoView({ behavior:'smooth', block:'center' });
+      });
+    });
+
+    // hotkey: '/' focuses search
+    document.addEventListener('keydown', function(e){
+      if (e.key === '/' && document.activeElement !== q && document.activeElement !== painInput){
+        e.preventDefault(); q.focus();
+      }
+    });
+  }
+
+  // ---- boot --------------------------------------------------------------
+  function showErr(msg){
+    document.getElementById('errBox').innerHTML = '<div class="err">'+esc(msg)+'</div>';
+  }
+  function boot(){
+    document.getElementById('results').innerHTML = '<div class="loading">summoning the estate</div>';
+    loadRegistry().then(function(reg){
+      state.registry = reg;
+      state.items = flatten(reg);
+      var liveCount = state.items.filter(function(it){ return (it.status||'').toLowerCase() === 'live'; }).length;
+      var tag = state.items.length + '+ live sovereign builds &middot; search &middot; match &middot; own';
+      document.getElementById('hdrTag').innerHTML = tag;
+      document.getElementById('srcMeta').innerHTML = 'registry v' + esc(reg.registryVersion||'?') + ' &middot; ' + liveCount + ' live';
+      buildChips();
+      wire();
+      render();
+      Signal.emit('fallfind_boot', { items: state.items.length, version: reg.registryVersion });
+    }).catch(function(err){
+      showErr('Failed to load registry: ' + (err && err.message || err) + ' — try refreshing.');
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('counter').innerHTML = 'offline';
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+
+</body>
+</html>
